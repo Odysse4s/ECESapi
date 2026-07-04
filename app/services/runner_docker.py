@@ -26,3 +26,12 @@ def _python_command() -> list[str]:
             echo "$STDIN_DATA" | base64 -d | python -u /tmp/main.py
         '''),
     ]
+
+def _javascript_command() -> list[str]:
+    return [
+        "sh", "-c",
+        textwrap.dedent('''
+            echo "$CODE" | base64 -d > /tmp/main.js
+            echo "$STDIN_DATA" | base64 -d | node /tmp/main.js
+        '''),
+    ]
