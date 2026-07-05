@@ -35,3 +35,23 @@ def _javascript_command() -> list[str]:
             echo "$STDIN_DATA" | base64 -d | node /tmp/main.js
         '''),
     ]
+
+def _c_command() -> list[str]:
+    return [
+        "sh", "-c",
+        textwrap.dedent(f'''
+            echo "$CODE" | base64 -d > /tmp/main.c
+            COMP_ERR=$(gcc /tmp/main.c -o /tmp/main -lm 2>&1)
+            if [ $? -ne 0 ]; then
+                printf '%s' "$COMP_ERR" >&2
+                exit {settings.compile_error_exit_code}
+            fi
+            echo "$STDIN_DATA" | base64 -d | /tmp/main
+        '''),
+    ]
+
+_COMMAND_MAP = {
+    Language.PYTHON: _python_command,
+    Language.C: _c_command,
+    Language.JAVASCRIPT: _javascript_command,
+}
