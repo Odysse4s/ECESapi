@@ -68,3 +68,19 @@ def get_docker_client() -> docker.DockerClient:
         return client
     except Exception as exc:
         raise DockerUnavailableError(f"Cannot reach Docker Engine: {exc}") from exc
+
+from app.core.exceptions import ContainerCreationError
+
+def _create_container(client, image, command, code_b64, stdin_b64, memory_limit_mb):
+    return client.containers.create(
+        image=image,
+        command=command,
+        environment={"CODE": code_b64, "STDIN_DATA": stdin_b64},
+        network_mode="none",
+        user=settings.container_user,
+        read_only=True,
+        tmpfs={"/tmp": f"size={settings.tmpfs_size_mb}m,exec"},
+        mem_limit=f"{memory_limit_mb}m",
+        memswap_limit=f"{memory_limit_mb}m",
+        nano_cpus=settings.container_nano_cpus,
+    )
