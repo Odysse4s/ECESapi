@@ -55,3 +55,16 @@ _COMMAND_MAP = {
     Language.C: _c_command,
     Language.JAVASCRIPT: _javascript_command,
 }
+
+import docker
+import docker.errors
+from requests.exceptions import ConnectionError as ReqConnectionError
+from app.core.exceptions import DockerUnavailableError
+
+def get_docker_client() -> docker.DockerClient:
+    try:
+        client = docker.from_env()
+        client.ping()
+        return client
+    except Exception as exc:
+        raise DockerUnavailableError(f"Cannot reach Docker Engine: {exc}") from exc
