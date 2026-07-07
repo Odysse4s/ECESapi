@@ -84,3 +84,31 @@ def _create_container(client, image, command, code_b64, stdin_b64, memory_limit_
         memswap_limit=f"{memory_limit_mb}m",
         nano_cpus=settings.container_nano_cpus,
     )
+
+import threading
+
+class _MemoryMonitor:
+    def __init__(self, container):
+        self.container = container
+        self.peak_bytes = 0
+        self._stop = threading.Event()
+        self._thread = None
+
+    def start(self):
+        self._thread = threading.Thread(target=self._run, daemon=True)
+        self._thread.start()
+
+    def stop(self):
+        self._stop.set()
+        if self._thread:
+            self._thread.join(timeout=3)
+
+    def _run(self):
+        try:
+            for chunk in self.container.stats(stream=True, decode=True):
+                if self._stop.is_set():
+                    break
+                usage = chunk.get("memory_stats", {}).get("usage", 0)
+                self.peak_bytes = max(self.peak_bytes, usage)
+        except Exception:
+            pass
