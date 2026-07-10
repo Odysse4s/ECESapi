@@ -15,3 +15,9 @@ def _classify_status(result, language: Language) -> ExecutionStatus:
     if result.exit_code != 0:
         return ExecutionStatus.RUNTIME_ERROR
     return ExecutionStatus.SUCCESS
+
+import asyncio
+
+async def execute(request: ExecutionRequest) -> ExecutionResponse:
+    # Initial prototype dispatch
+    pass
