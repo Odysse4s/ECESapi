@@ -20,3 +20,5 @@ class Settings(BaseSettings):
     model_config = {"env_prefix": "ECES_"}
 
 settings = Settings()
+
+# Refined config comments
