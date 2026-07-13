@@ -24,3 +24,12 @@ class TestJavaScriptExecution:
     async def test_hello_world(self, client: AsyncClient):
         status, body = await _execute(client, language="javascript", code="console.log('Hello JS!');")
         assert status == 200
+
+class TestValidation:
+    async def test_empty_code_rejected(self, client: AsyncClient):
+        resp = await client.post("/api/v1/execute", json={"language": "python", "code": ""})
+        assert resp.status_code == 422
+
+    async def test_unsupported_language_rejected(self, client: AsyncClient):
+        resp = await client.post("/api/v1/execute", json={"language": "cobol", "code": "DISPLAY 1"})
+        assert resp.status_code == 422
