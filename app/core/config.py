@@ -22,3 +22,5 @@ class Settings(BaseSettings):
 settings = Settings()
 
 # Refined config comments
+
+# Container pids_limit = 64
