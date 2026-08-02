@@ -1,0 +1,40 @@
+# docker-compose.yml — Run ECES API with optional Prometheus monitoring
+
+services:
+  api:
+    build: .
+    container_name: eces-api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Bind-mount the Docker socket so the API can spawn sandbox containers
+      # on the host daemon (Docker-outside-of-Docker pattern).
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - ECES_DEBUG=false
+      - ECES_RATE_LIMIT_ENABLED=true
+      - ECES_RATE_LIMIT_REQUESTS=60
+      - ECES_RATE_LIMIT_WINDOW_SECONDS=60
+      - ECES_MAX_CONCURRENT_EXECUTIONS=10
+      - ECES_HISTORY_ENABLED=true
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: eces-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - api
+    restart: unless-stopped
+    profiles:
+      - monitoring
+      - all
