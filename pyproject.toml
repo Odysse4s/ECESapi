@@ -1,14 +1,47 @@
 [project]
 name = "eces-api"
-version = "0.1.0"
-description = "Ephemeral Code Execution Sandbox API"
+version = "1.0.0"
+description = "Ephemeral Code Execution Sandbox — a secure REST API for running untrusted code snippets in isolated Docker containers."
 requires-python = ">=3.12"
+license = "MIT"
+authors = [{ name = "Odysseas Avdikos" }]
+
 dependencies = [
     "fastapi>=0.115,<1",
     "uvicorn[standard]>=0.30,<1",
     "docker>=7.1,<8",
+    "pydantic>=2.9,<3",
+    "pydantic-settings>=2.5,<3",
+    "prometheus-client>=0.21,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8,<9",
+    "pytest-asyncio>=0.24,<1",
+    "httpx>=0.27,<1",
+    "websockets>=13,<14",
+    "ruff>=0.6,<1",
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+    "integration: tests requiring a live Docker daemon",
+    "slow: tests with intentional delays (timeouts, sleeps)",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "RUF"]
