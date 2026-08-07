@@ -1,1 +1,1 @@
-"""Core configurations and exceptions."""
+# app.core
